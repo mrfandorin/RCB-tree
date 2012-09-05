@@ -1,16 +1,26 @@
 #ifndef _KDTREE_H_
 #define _KDTREE_H_
 
-struct kdtree;
+typedef struct Kdtree {
+	float x;
+	float y;
+	float z;
+	
+	// data
+	float v; // velocity
+	float p; // pressure
+		
+} Kdtree;
 
-/* Create a kd-tree for k-dimensional data, pointer to array */
-struct kdtree *kd_create();
+/* Build the kd-tree */
+Kdtree *kd_build(Kdtree *tree, int size, int axis);
+
+/* Print the kdtree */
+void kd_print(Kdtree *tree, int size);
 
 /* Free the kdtree */
-void kd_free(struct kdtree *tree);
+void kd_free(Kdtree *tree);
 
-/* Insert point into kdtree */
-int kd_insert(struct kdtree *tree, double *point, void *data);
 
 #endif	/* _KDTREE_H_ */
 
