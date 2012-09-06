@@ -13,7 +13,7 @@ typedef struct Kdtree {
 } Kdtree;
 
 /* Build the kd-tree */
-Kdtree *kd_build(Kdtree *tree, int size, int axis);
+void kd_build(Kdtree *tree, Kdtree *kd_tree, int size, int axis, int c_index);
 
 /* Print the kdtree */
 void kd_print(Kdtree *tree, int size);
