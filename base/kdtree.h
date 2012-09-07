@@ -2,13 +2,13 @@
 #define _KDTREE_H_
 
 typedef struct Kdtree {
-	float x;
-	float y;
-	float z;
+  float x;
+  float y;
+  float z;
 	
-	// data
-	float v; // velocity
-	float p; // pressure
+  // data
+  float v; // velocity
+  float p; // pressure
 		
 } Kdtree;
 
