@@ -12,6 +12,8 @@ typedef struct Kdtree {
 		
 } Kdtree;
 
+int kd_read(char *filename, Kdtree *data);
+
 /* Build the kd-tree */
 void kd_build(Kdtree *tree, Kdtree *kd_tree, int size, int axis, int c_index);
 
@@ -20,6 +22,7 @@ void kd_print(Kdtree *tree, int size);
 
 /* Free the kdtree */
 void kd_free(Kdtree *tree);
+
 
 
 #endif	/* _KDTREE_H_ */

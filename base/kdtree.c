@@ -77,6 +77,42 @@ void kd_free(Kdtree *tree) {
   free(tree);
 }
 
+int kd_read(char *filename, Kdtree *data) {
+  int i, rc, size;
+  float x, y, z, v, p;
+
+  FILE *stream = fopen(filename, "r");
+  if (stream == NULL) {
+    return 1;
+  }    
+
+  // Read number of points
+  if (fscanf(stream, "%d", &size) != 1) {
+    return 2;
+  }
+    
+  // Allocation memory block for all points
+  data = (Kdtree*)calloc(size, sizeof(Kdtree));
+  
+  if (data == NULL) {
+    return 3;
+  }
+  
+   // Read points from file
+  for(i = 0; i < size; i++) {
+    rc = fscanf(stream, "%f %f %f %f %f", &x, &y, &z, &v, &p);
+    if (rc != 5) {
+      free(data);
+      return 2;
+    }
+    data[i].x = x; data[i].y = y; data[i].z = z;
+    data[i].v = v; data[i].p = p;
+  }
+  
+  return 0;
+}
+
+/*
 int main(int argc, char **argv) {
   Kdtree *tree, *kd_tree;
   int i, size, size2;
@@ -114,3 +150,6 @@ int main(int argc, char **argv) {
 
    return 0;
 }
+
+*/
+

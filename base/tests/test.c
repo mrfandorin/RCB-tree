@@ -3,7 +3,6 @@
 #include <CUnit/Basic.h>
 #include "kdtree.h"
 
-
 int init_suite(void) {
   return 0;
 }
@@ -14,6 +13,22 @@ int clean_suite(void) {
 
 void testKD_BUILD(void) {
   CU_ASSERT(0 == 0);
+}
+
+void testKD_READ_SUCCESS(void) {
+  Kdtree *data;
+  CU_ASSERT(0 == kd_read("tests/data/data.txt", data));
+  CU_ASSERT(NULL != data);
+}
+
+void testKD_READ_NO_EXIST_FILE(void) {
+  Kdtree *data;
+  CU_ASSERT(1 == kd_read("tests/data/data_no_exist.txt", data));
+}
+
+void testKD_READ_NO_VALID(void) {
+  Kdtree *data;
+  CU_ASSERT(2 == kd_read("tests/data/data_no_valid.txt", data));
 }
 
 int main() {
@@ -32,9 +47,13 @@ int main() {
   }
 
   /* add the tests to the suite */
-  if ((NULL == CU_add_test(pSuite, "test of kd_build()", testKD_BUILD))) {
+  if ((NULL == CU_add_test(pSuite, "test of kd_read() [NO_EXIST_FILE]", testKD_READ_NO_EXIST_FILE)) ||
+      (NULL == CU_add_test(pSuite, "test of kd_read() [NO_VALID]", testKD_READ_NO_VALID)) ||
+      (NULL == CU_add_test(pSuite, "test of kd_read() [SUCCESS]", testKD_READ_SUCCESS))) {
+
     CU_cleanup_registry();
     return CU_get_error();
+
   }
 
   /* Run all tests using the CUnit Basic interface */
