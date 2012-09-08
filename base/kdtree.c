@@ -30,14 +30,29 @@ int z_cmp(const void *a, const void *b)
 }
 
 
-void kd_build(Kdtree *tree, Kdtree *kd_tree, int size, int axis, int c_index) {
+int kd_build(Kdtree *tree, Kdtree *kd_tree, int size, int axis, int c_index) {
   // Sorting points by coordinate
   int m_index, m_size; // median index
+  int size2;
+
   //int c_index = 0; // current index
   if (size == 0) {
     return;
   }
+
+  if (NULL == kd_tree) {
+    // Full number points in kd tree, by power 2
+    size2 = (int)pow(2, ceil(log(size)/log(2)));
+
+    // Allocation memory block for kd tree
+    kd_tree = (Kdtree*)calloc(size2, sizeof(Kdtree));
+    if (NULL == kd_tree) {
+      return 1;
+    }
+  }
+
   printf("Step: size=%d, axis=%d, c_index=%d\n", size, axis, c_index);
+  //kd_print(tree, size);
   if (axis == 0) {
     qsort(tree, size, sizeof(Kdtree), x_cmp);
   } else if (axis == 1) {
@@ -45,7 +60,7 @@ void kd_build(Kdtree *tree, Kdtree *kd_tree, int size, int axis, int c_index) {
   } else if (axis == 2) {
     qsort(tree, size, sizeof(Kdtree), z_cmp);
   }
-  kd_print(tree, size);
+  //kd_print(tree, size);
 
   m_index = size / 2;
   if (size % 2 != 0) {
@@ -63,6 +78,8 @@ void kd_build(Kdtree *tree, Kdtree *kd_tree, int size, int axis, int c_index) {
   axis = (axis + 1) % 3;
   kd_build(tree, kd_tree, m_index, axis, 2 * (c_index + 1) - 1);
   kd_build(tree + m_index + 1, kd_tree, m_size, axis, 2 * (c_index + 1));	
+
+  return 0;
 }
 
 void kd_print(Kdtree *tree, int size) {
@@ -77,25 +94,26 @@ void kd_free(Kdtree *tree) {
   free(tree);
 }
 
-int kd_read(char *filename, Kdtree *data) {
+int kd_read(char *filename, Kdtree **p_data) {
   int i, rc, size;
   float x, y, z, v, p;
+  Kdtree *data;
 
   FILE *stream = fopen(filename, "r");
   if (stream == NULL) {
-    return 1;
+    return -1;
   }    
 
   // Read number of points
   if (fscanf(stream, "%d", &size) != 1) {
-    return 2;
+    return -2;
   }
     
   // Allocation memory block for all points
   data = (Kdtree*)calloc(size, sizeof(Kdtree));
   
   if (data == NULL) {
-    return 3;
+    return -3;
   }
   
    // Read points from file
@@ -103,13 +121,14 @@ int kd_read(char *filename, Kdtree *data) {
     rc = fscanf(stream, "%f %f %f %f %f", &x, &y, &z, &v, &p);
     if (rc != 5) {
       free(data);
-      return 2;
+      return -2;
     }
     data[i].x = x; data[i].y = y; data[i].z = z;
     data[i].v = v; data[i].p = p;
   }
-  
-  return 0;
+  kd_print(data, size);
+  *p_data = data;
+  return size;
 }
 
 /*

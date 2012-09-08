@@ -12,10 +12,10 @@ typedef struct Kdtree {
 		
 } Kdtree;
 
-int kd_read(char *filename, Kdtree *data);
+int kd_read(char *filename, Kdtree **p);
 
 /* Build the kd-tree */
-void kd_build(Kdtree *tree, Kdtree *kd_tree, int size, int axis, int c_index);
+int kd_build(Kdtree *tree, Kdtree *kd_tree, int size, int axis, int c_index);
 
 /* Print the kdtree */
 void kd_print(Kdtree *tree, int size);
