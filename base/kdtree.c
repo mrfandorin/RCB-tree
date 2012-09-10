@@ -30,29 +30,33 @@ int z_cmp(const void *a, const void *b)
 }
 
 
-int kd_build(Kdtree *tree, Kdtree *kd_tree, int size, int axis, int c_index) {
+int kd_build(Kdtree *tree, Kdtree **kd_tree, int size, int *kd_tree_size, int c_index) {
   // Sorting points by coordinate
   int m_index, m_size; // median index
-  int size2;
+  int axis, size2;
+	Kdtree *tmp;
 
   //int c_index = 0; // current index
   if (size == 0) {
     return;
   }
-
-  if (NULL == kd_tree) {
+	if (NULL == *kd_tree) {
+		
     // Full number points in kd tree, by power 2
-    size2 = (int)pow(2, ceil(log(size)/log(2)));
-
+    size2 = (int)pow(2, ceil(log(size)/log(2))) - 1;
+		
+		*kd_tree_size = size2;
+		
     // Allocation memory block for kd tree
-    kd_tree = (Kdtree*)calloc(size2, sizeof(Kdtree));
-    if (NULL == kd_tree) {
+		*kd_tree = (Kdtree*)calloc(size2, sizeof(Kdtree));
+		
+		if (NULL == *kd_tree) {
       return 1;
     }
-  }
+  } 
 
-  printf("Step: size=%d, axis=%d, c_index=%d\n", size, axis, c_index);
-  //kd_print(tree, size);
+  axis = ((int)floor(log(2 * (c_index + 1))/log(2)) - 1) % 3;
+
   if (axis == 0) {
     qsort(tree, size, sizeof(Kdtree), x_cmp);
   } else if (axis == 1) {
@@ -60,8 +64,8 @@ int kd_build(Kdtree *tree, Kdtree *kd_tree, int size, int axis, int c_index) {
   } else if (axis == 2) {
     qsort(tree, size, sizeof(Kdtree), z_cmp);
   }
-  //kd_print(tree, size);
-
+  //printf("Step c_index=%d, axis=%d\n", c_index, axis);
+  //kd_print(tree, size);	
   m_index = size / 2;
   if (size % 2 != 0) {
     m_index += 1;  
@@ -71,13 +75,14 @@ int kd_build(Kdtree *tree, Kdtree *kd_tree, int size, int axis, int c_index) {
   if (size % 2 == 0) {
     m_size += 1;
   }
-  // Add a new point
-  memcpy(&kd_tree[c_index], &tree[m_index], sizeof(Kdtree));
-
+  
+	// Add a new point
+  memcpy(&(*kd_tree)[c_index], &tree[m_index], sizeof(Kdtree));
+	
   // Next axis
   axis = (axis + 1) % 3;
-  kd_build(tree, kd_tree, m_index, axis, 2 * (c_index + 1) - 1);
-  kd_build(tree + m_index + 1, kd_tree, m_size, axis, 2 * (c_index + 1));	
+  kd_build(tree, kd_tree, m_index, kd_tree_size, 2 * (c_index + 1) - 1);
+  kd_build(tree + m_index + 1, kd_tree, m_size, kd_tree_size, 2 * (c_index + 1));	
 
   return 0;
 }
@@ -126,7 +131,7 @@ int kd_read(char *filename, Kdtree **p_data) {
     data[i].x = x; data[i].y = y; data[i].z = z;
     data[i].v = v; data[i].p = p;
   }
-  kd_print(data, size);
+  
   *p_data = data;
   return size;
 }

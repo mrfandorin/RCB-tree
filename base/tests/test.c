@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <CUnit/Basic.h>
 #include "kdtree.h"
@@ -13,31 +14,75 @@ int clean_suite(void) {
 
 
 void testKD_READ_SUCCESS(void) {
-  Kdtree *data;
+  Kdtree *data = NULL;
 
-  //CU_ASSERT(kd_read("tests/data/data.txt", data) > 0);
-  //CU_ASSERT(NULL != data);
+  CU_ASSERT(kd_read("tests/data/data.txt", &data) > 0);
+  CU_ASSERT(NULL != data);
+  free(data);
 }
 
 void testKD_READ_NO_EXIST_FILE(void) {
-  Kdtree *data;
+  Kdtree *data = NULL;
   int size;
-//  CU_ASSERT(kd_read("tests/data/data_no_exist.txt", data) == -1);
+  CU_ASSERT(kd_read("tests/data/data_no_exist.txt", &data) == -1);
+  free(data);
 }
 
 void testKD_READ_NO_VALID(void) {
-  Kdtree *data;
-  //CU_ASSERT(kd_read("tests/data/data_no_valid.txt", data) == -2);
+  Kdtree *data = NULL;
+  CU_ASSERT(kd_read("tests/data/data_no_valid.txt", &data) == -2);
+  free(data);
 }
 
+int check_invariant(Kdtree *kd_tree, int kd_tree_size) {
+	int i;
+	int level, level2;
+	Kdtree current, left, right;
+
+	level = (int)floor(log(kd_tree_size)/log(2));
+        for(i = 0; i < kd_tree_size - (int)pow(2, level); i++) {
+                current = kd_tree[i];
+                left = kd_tree[2 * (i + 1) - 1];
+                right = kd_tree[2 * (i + 1)];
+                level2 = ((int)floor(log(2 * (i + 1))/log(2)) - 1) % 3;
+                if (level2 == 0) {
+                        CU_ASSERT_TRUE(left.x <= current.x && right.x >= current.x);			
+                } else if (level2 == 1) {
+                        CU_ASSERT_TRUE(left.y <= current.y && right.y >= current.y);
+                }       else if (level2 == 2) {
+                        CU_ASSERT_TRUE(left.z <= current.z && right.z >= current.z);
+                }
+        }
+
+}
+
+
 void testKD_BUILD(void) {
-  Kdtree *data, *kd_tree;
-  int size;
+  Kdtree *data = NULL, *kd_tree = NULL;
+  int kd_tree_size, data_size;
+	
+  CU_ASSERT((data_size = kd_read("tests/data/data1.txt", &data)) >= 0);
+  CU_ASSERT(0 == kd_build(data, &kd_tree, data_size, &kd_tree_size, 0));
+  check_invariant(kd_tree, kd_tree_size);
+  free(data);
+  free(kd_tree);
+  
+  data = NULL; kd_tree = NULL;
+  CU_ASSERT((data_size = kd_read("tests/data/data2.txt", &data)) >= 0);
+  CU_ASSERT(0 == kd_build(data, &kd_tree, data_size, &kd_tree_size, 0));
+  check_invariant(kd_tree, kd_tree_size);
+  free(data);
+  free(kd_tree);
 
-  CU_ASSERT(size = kd_read("tests/data/data1.txt", &data) > 0);
-  CU_ASSERT(0 == kd_build(data, kd_tree, 3, 0, 0));
+  data = NULL; kd_tree = NULL;
+  CU_ASSERT((data_size = kd_read("tests/data/data3.txt", &data)) >= 0);
+  CU_ASSERT(0 == kd_build(data, &kd_tree, data_size, &kd_tree_size, 0));
+  check_invariant(kd_tree, kd_tree_size);
+  free(data);
+  free(kd_tree);
 
-  kd_print(kd_tree, 3);
+  //kd_print(kd_tree, kd_tree_size);
+
 }
 
 int main() {
@@ -78,7 +123,7 @@ int main() {
 
 
   /* Run all tests using the CUnit Basic interface */
-  CU_basic_set_mode(CU_BRM_NORMAL);
+  CU_basic_set_mode(CU_BRM_VERBOSE);
   CU_basic_run_tests();
   CU_cleanup_registry();
   return CU_get_error();
