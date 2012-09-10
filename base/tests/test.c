@@ -45,6 +45,7 @@ int check_invariant(Kdtree *kd_tree, int kd_tree_size) {
                 left = kd_tree[2 * (i + 1) - 1];
                 right = kd_tree[2 * (i + 1)];
                 level2 = ((int)floor(log(2 * (i + 1))/log(2)) - 1) % 3;
+           
                 if (level2 == 0) {
                         CU_ASSERT_TRUE(left.x <= current.x && right.x >= current.x);			
                 } else if (level2 == 1) {
@@ -52,14 +53,22 @@ int check_invariant(Kdtree *kd_tree, int kd_tree_size) {
                 }       else if (level2 == 2) {
                         CU_ASSERT_TRUE(left.z <= current.z && right.z >= current.z);
                 }
+
         }
 
 }
 
+void generate_data(int n) {
+  char args[1024];
+ 
+  sprintf(args, "./tests/data/generate_data.rb data_size_%d.txt %d", n, n);
+  system(args);  
+}
 
 void testKD_BUILD(void) {
   Kdtree *data = NULL, *kd_tree = NULL;
-  int kd_tree_size, data_size;
+  int kd_tree_size, data_size, n;
+  char filename[1024];
 	
   CU_ASSERT((data_size = kd_read("tests/data/data1.txt", &data)) >= 0);
   CU_ASSERT(0 == kd_build(data, &kd_tree, data_size, &kd_tree_size, 0));
@@ -80,6 +89,18 @@ void testKD_BUILD(void) {
   check_invariant(kd_tree, kd_tree_size);
   free(data);
   free(kd_tree);
+  
+  n = 10;
+  generate_data(n);
+  data = NULL; kd_tree = NULL;
+  sprintf(filename, "tests/data/data_size_%d.txt", n);
+
+  CU_ASSERT((data_size = kd_read(filename, &data)) >= 0);
+  CU_ASSERT(0 == kd_build(data, &kd_tree, data_size, &kd_tree_size, 0));
+  check_invariant(kd_tree, kd_tree_size);
+  free(data);
+  free(kd_tree);
+
 
   //kd_print(kd_tree, kd_tree_size);
 

@@ -34,23 +34,25 @@ int kd_build(Kdtree *tree, Kdtree **kd_tree, int size, int *kd_tree_size, int c_
   // Sorting points by coordinate
   int m_index, m_size; // median index
   int axis, size2;
-	Kdtree *tmp;
+  Kdtree *tmp;
+  int i;
 
   //int c_index = 0; // current index
   if (size == 0) {
     return;
   }
-	if (NULL == *kd_tree) {
+  
+  if (NULL == *kd_tree) {
 		
     // Full number points in kd tree, by power 2
     size2 = (int)pow(2, ceil(log(size)/log(2))) - 1;
 		
-		*kd_tree_size = size2;
+    *kd_tree_size = size2;
 		
     // Allocation memory block for kd tree
-		*kd_tree = (Kdtree*)calloc(size2, sizeof(Kdtree));
-		
-		if (NULL == *kd_tree) {
+    *kd_tree = (Kdtree*)calloc(size2, sizeof(Kdtree));
+			
+    if (NULL == *kd_tree) {
       return 1;
     }
   } 
@@ -111,6 +113,7 @@ int kd_read(char *filename, Kdtree **p_data) {
 
   // Read number of points
   if (fscanf(stream, "%d", &size) != 1) {
+    fclose(stream);
     return -2;
   }
     
@@ -118,6 +121,7 @@ int kd_read(char *filename, Kdtree **p_data) {
   data = (Kdtree*)calloc(size, sizeof(Kdtree));
   
   if (data == NULL) {
+    fclose(stream);
     return -3;
   }
   
@@ -125,6 +129,7 @@ int kd_read(char *filename, Kdtree **p_data) {
   for(i = 0; i < size; i++) {
     rc = fscanf(stream, "%f %f %f %f %f", &x, &y, &z, &v, &p);
     if (rc != 5) {
+      fclose(stream);
       free(data);
       return -2;
     }
@@ -133,6 +138,9 @@ int kd_read(char *filename, Kdtree **p_data) {
   }
   
   *p_data = data;
+
+  fclose(stream);
+
   return size;
 }
 
