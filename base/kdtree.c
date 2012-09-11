@@ -80,6 +80,7 @@ int kd_build(Kdtree *tree, Kdtree **kd_tree, int size, int *kd_tree_size, int c_
   
 	// Add a new point
   memcpy(&(*kd_tree)[c_index], &tree[m_index], sizeof(Kdtree));
+  (*kd_tree)[c_index].fill = true; 
 	
   // Next axis
   axis = (axis + 1) % 3;

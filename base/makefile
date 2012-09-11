@@ -6,5 +6,5 @@ test: clean kdtree.c kdtree.h tests/test.c
 	@./test
 
 clean: 
-	@rm -f kdtree test *.gch
+	@rm -f kdtree test *.gch tests/data/data_size_*.txt
 

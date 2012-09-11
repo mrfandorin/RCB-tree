@@ -35,27 +35,40 @@ void testKD_READ_NO_VALID(void) {
 }
 
 int check_invariant(Kdtree *kd_tree, int kd_tree_size) {
-	int i;
-	int level, level2;
-	Kdtree current, left, right;
+  int i;
+  int level, level2;
+  Kdtree current, left, right;
 
-	level = (int)floor(log(kd_tree_size)/log(2));
-        for(i = 0; i < kd_tree_size - (int)pow(2, level); i++) {
-                current = kd_tree[i];
-                left = kd_tree[2 * (i + 1) - 1];
-                right = kd_tree[2 * (i + 1)];
-                level2 = ((int)floor(log(2 * (i + 1))/log(2)) - 1) % 3;
+  level = (int)floor(log(kd_tree_size)/log(2));
+  for(i = 0; i < kd_tree_size - (int)pow(2, level); i++) {
+    current = kd_tree[i];
+    left = kd_tree[2 * (i + 1) - 1];
+    right = kd_tree[2 * (i + 1)];
+    level2 = ((int)floor(log(2 * (i + 1))/log(2)) - 1) % 3;
            
-                if (level2 == 0) {
-                        CU_ASSERT_TRUE(left.x <= current.x && right.x >= current.x);			
-                } else if (level2 == 1) {
-                        CU_ASSERT_TRUE(left.y <= current.y && right.y >= current.y);
-                }       else if (level2 == 2) {
-                        CU_ASSERT_TRUE(left.z <= current.z && right.z >= current.z);
-                }
-
-        }
-
+    if (level2 == 0) {
+      if (left.fill == true) {
+        CU_ASSERT_TRUE(left.x <= current.x);
+      }
+      if (right.fill == true) {
+        CU_ASSERT_TRUE(right.x >= current.x);
+      }
+    } else if (level2 == 1) { 
+      if (left.fill == true) {
+        CU_ASSERT_TRUE(left.y <= current.y);
+      }
+      if (right.fill == true) {
+        CU_ASSERT_TRUE(right.y >= current.y);
+      }			
+    } else if (level2 == 2) {
+      if (left.fill == true) {
+        CU_ASSERT_TRUE(left.z <= current.z); 
+      }
+      if (right.fill == true) {
+        CU_ASSERT_TRUE(right.z >= current.z);
+      }                  
+    }
+  }
 }
 
 void generate_data(int n) {
@@ -65,7 +78,7 @@ void generate_data(int n) {
   system(args);  
 }
 
-void testKD_BUILD(void) {
+void testKD_BUILD_STATIC(void) {
   Kdtree *data = NULL, *kd_tree = NULL;
   int kd_tree_size, data_size, n;
   char filename[1024];
@@ -75,24 +88,16 @@ void testKD_BUILD(void) {
   check_invariant(kd_tree, kd_tree_size);
   free(data);
   free(kd_tree);
-  
-  data = NULL; kd_tree = NULL;
-  CU_ASSERT((data_size = kd_read("tests/data/data2.txt", &data)) >= 0);
-  CU_ASSERT(0 == kd_build(data, &kd_tree, data_size, &kd_tree_size, 0));
-  check_invariant(kd_tree, kd_tree_size);
-  free(data);
-  free(kd_tree);
 
-  data = NULL; kd_tree = NULL;
-  CU_ASSERT((data_size = kd_read("tests/data/data3.txt", &data)) >= 0);
-  CU_ASSERT(0 == kd_build(data, &kd_tree, data_size, &kd_tree_size, 0));
-  check_invariant(kd_tree, kd_tree_size);
-  free(data);
-  free(kd_tree);
-  
-  n = 10;
+}
+
+void testKD_BUILD_RANDOM_100(void) {
+  Kdtree *data = NULL, *kd_tree = NULL;
+  int kd_tree_size, data_size, n;
+  char filename[1024];
+
+  n = 100;
   generate_data(n);
-  data = NULL; kd_tree = NULL;
   sprintf(filename, "tests/data/data_size_%d.txt", n);
 
   CU_ASSERT((data_size = kd_read(filename, &data)) >= 0);
@@ -100,10 +105,54 @@ void testKD_BUILD(void) {
   check_invariant(kd_tree, kd_tree_size);
   free(data);
   free(kd_tree);
+}
 
+void testKD_BUILD_RANDOM_500(void) {
+  Kdtree *data = NULL, *kd_tree = NULL;
+  int kd_tree_size, data_size, n;
+  char filename[1024];
 
-  //kd_print(kd_tree, kd_tree_size);
+  n = 500;
+  generate_data(n);
+  sprintf(filename, "tests/data/data_size_%d.txt", n);
 
+  CU_ASSERT((data_size = kd_read(filename, &data)) >= 0);
+  CU_ASSERT(0 == kd_build(data, &kd_tree, data_size, &kd_tree_size, 0));
+  check_invariant(kd_tree, kd_tree_size);
+  free(data);
+  free(kd_tree);
+}
+
+void testKD_BUILD_RANDOM_1000(void) {
+  Kdtree *data = NULL, *kd_tree = NULL;
+  int kd_tree_size, data_size, n;
+  char filename[1024];
+
+  n = 1000;
+  generate_data(n);
+  sprintf(filename, "tests/data/data_size_%d.txt", n);
+
+  CU_ASSERT((data_size = kd_read(filename, &data)) >= 0);
+  CU_ASSERT(0 == kd_build(data, &kd_tree, data_size, &kd_tree_size, 0));
+  check_invariant(kd_tree, kd_tree_size);
+  free(data);
+  free(kd_tree);
+}
+
+void testKD_BUILD_RANDOM_5000(void) {
+  Kdtree *data = NULL, *kd_tree = NULL;
+  int kd_tree_size, data_size, n;
+  char filename[1024];
+
+  n = 5000;
+  generate_data(n);
+  sprintf(filename, "tests/data/data_size_%d.txt", n);
+
+  CU_ASSERT((data_size = kd_read(filename, &data)) >= 0);
+  CU_ASSERT(0 == kd_build(data, &kd_tree, data_size, &kd_tree_size, 0));
+  check_invariant(kd_tree, kd_tree_size);
+  free(data);
+  free(kd_tree);
 }
 
 int main() {
@@ -136,7 +185,11 @@ int main() {
     return CU_get_error();
   }
 
-  if ((NULL == CU_add_test(pSuite, "test of kd_build() [BUILD]", testKD_BUILD))) {
+  if ((NULL == CU_add_test(pSuite, "test of kd_build() [BUILD_STATIC]", testKD_BUILD_STATIC)) ||
+      (NULL == CU_add_test(pSuite, "test of kd_build() [BUILD_RANDOM_100]", testKD_BUILD_RANDOM_100)) ||
+      (NULL == CU_add_test(pSuite, "test of kd_build() [BUILD_RANDOM_500]", testKD_BUILD_RANDOM_500)) ||
+      (NULL == CU_add_test(pSuite, "test of kd_build() [BUILD_RANDOM_1000]", testKD_BUILD_RANDOM_1000)) ||
+      (NULL == CU_add_test(pSuite, "test of kd_build() [BUILD_RANDOM_5000]", testKD_BUILD_RANDOM_5000))) {
 
     CU_cleanup_registry();
     return CU_get_error();

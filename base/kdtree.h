@@ -1,10 +1,15 @@
 #ifndef _KDTREE_H_
 #define _KDTREE_H_
 
+#define true 1
+#define false 0
+typedef char bool;
+
 typedef struct Kdtree {
   float x;
   float y;
   float z;
+  bool fill;
 	
   // data
   float v; // velocity
