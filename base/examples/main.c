@@ -16,8 +16,7 @@ int main(int argc, char **argv) {
 
   printf("Recursive:\n");
   kd_read("tests/data/data1.txt", &data);
-  kd_tree.nodes = NULL;
-  kd_build_recursive(data.nodes, &kd_tree, data.size, 0);
+  kd_build_recursive(&data, &kd_tree);
   kd_print(&kd_tree);
   kd_free(&data);
   kd_free(&kd_tree);

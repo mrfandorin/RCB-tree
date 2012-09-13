@@ -1,8 +1,8 @@
 kdtree: clean kdtree.c kdtree.h
 	@gcc -o kdtree kdtree.c -lm
 
-test: clean kdtree.c kdtree.h tests/test.c
-	@gcc -o test tests/test.c kdtree.c kdtree.h -lm -lcunit -I.
+test: clean kdtree.c kdtree.h queue.c queue.h tests/test.c
+	@gcc -o test tests/test.c kdtree.c kdtree.h queue.c queue.h -lm -lcunit -I.
 	@./test
 
 example: clean kdtree.c kdtree.h queue.c queue.h

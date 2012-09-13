@@ -82,6 +82,12 @@ int kd_build(Kdtree *data, Kdtree *kd_tree) {
   int **coords;
   int **ind;
 
+  if (data->size == 0) {
+    kd_tree->nodes = NULL;
+    kd_tree->size = 0;
+    return 0;
+  }
+
   level = ceil(log(data->size + 1)/log(2));
   size2 = (int)pow(2, level) - 1;
   
@@ -129,14 +135,19 @@ int kd_build(Kdtree *data, Kdtree *kd_tree) {
     kd_tree->nodes[c_index].fill = true;
     //kd_print(kd_tree);
   }
-  //for(i = 0; i < data->size; i++) {
-  //  free(ind[i]);
-  //}
-  //free(ind);
-      
+
+  return 0;
 }
 
-int kd_build_recursive(Node *tree, Kdtree *kd_tree, int size, int c_index) {
+int kd_build_recursive(Kdtree *data, Kdtree *kd_tree) {
+  kd_tree->nodes = NULL;
+  if (data->size == 0) {
+    kd_tree->size = 0;
+  }
+  kd_build_recursive_iter(data->nodes, kd_tree, data->size, 0);
+}
+
+int kd_build_recursive_iter(Node *tree, Kdtree *kd_tree, int size, int c_index) {
   // Sorting points by coordinate
   int m_index, m_size; // median index
   int axis, size2;
@@ -188,8 +199,8 @@ int kd_build_recursive(Node *tree, Kdtree *kd_tree, int size, int c_index) {
   //printf("Step: m_index=%d, m_size=%d, c_index=%d\n", m_index, m_size, c_index);
   // Next axis
   axis = (axis + 1) % 3;
-  kd_build_recursive(tree, kd_tree, m_index, 2 * (c_index + 1) - 1);
-  kd_build_recursive(tree + m_index + 1, kd_tree, m_size, 2 * (c_index + 1));
+  kd_build_recursive_iter(tree, kd_tree, m_index, 2 * (c_index + 1) - 1);
+  kd_build_recursive_iter(tree + m_index + 1, kd_tree, m_size, 2 * (c_index + 1));
 
   return 0;
 
@@ -206,7 +217,9 @@ void kd_print(Kdtree *tree) {
 }
 
 void kd_free(Kdtree *tree) {
-  free(tree->nodes);
+  if (tree->nodes != NULL) {
+    free(tree->nodes);
+  }
 }
 
 int kd_read(char *filename, Kdtree *data) {
@@ -224,6 +237,12 @@ int kd_read(char *filename, Kdtree *data) {
     return -2;
   }
    
+  if (size == 0) {
+    data->nodes = NULL;
+    data->size = 0;
+    return 0;
+  }
+ 
   // Allocation memory block for all points
   data->nodes = (Node*)calloc(size, sizeof(Node));
   data->size = size;
