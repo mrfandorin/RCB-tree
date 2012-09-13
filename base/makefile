@@ -5,6 +5,10 @@ test: clean kdtree.c kdtree.h tests/test.c
 	@gcc -o test tests/test.c kdtree.c kdtree.h -lm -lcunit -I.
 	@./test
 
+example: clean kdtree.c kdtree.h queue.c queue.h
+	@gcc -o example examples/main.c kdtree.c kdtree.h queue.c queue.h -lm -I.
+	@./example
+	
 clean: 
-	@rm -f kdtree test *.gch tests/data/data_size_*.txt
+	@rm -f kdtree test a.out example *.gch tests/data/data_size_*.txt
 

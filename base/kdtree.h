@@ -5,7 +5,7 @@
 #define false 0
 typedef char bool;
 
-typedef struct Kdtree {
+typedef struct Node {
   float x;
   float y;
   float z;
@@ -15,18 +15,22 @@ typedef struct Kdtree {
   float v; // velocity
   float p; // pressure
 		
+} Node;
+
+
+typedef struct Kdtree {
+  Node *nodes;
+  int size;
+
 } Kdtree;
 
-int kd_read(char *filename, Kdtree **p);
+int kd_read(char *filename, Kdtree *p);
 
-/* Build the kd-tree */
-int kd_build(Kdtree *tree, Kdtree **kd_tree, int size, int *kd_tree_size, int c_index);
+//int kd_build(Kdtree *tree, Kdtree **kd_tree, int size, int *kd_tree_size, int c_index);
 
-/* Print the kdtree */
-void kd_print(Kdtree *tree, int size);
+void kd_print(Kdtree *tree);
 
-/* Free the kdtree */
-void kd_free(Kdtree *tree);
+//void kd_free(Kdtree *tree);
 
 
 
