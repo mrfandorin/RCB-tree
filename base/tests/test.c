@@ -30,10 +30,9 @@ void testKD_READ_NO_EXIST_FILE(void) {
 void testKD_READ_NO_VALID(void) {
   Kdtree data;
   CU_ASSERT(kd_read("tests/data/data_no_valid.txt", &data) == -2);
-  kd_free(data.nodes);
 }
 
-int check_invariant(Kdtree *kd_tree) {
+void check_invariant(Kdtree *kd_tree) {
   int i;
   int level, level2;
   Node current, left, right;
@@ -70,7 +69,7 @@ int check_invariant(Kdtree *kd_tree) {
   }
 }
 
-int check_equal_kd_tree(Kdtree *t1, Kdtree *t2) {
+void check_equal_kd_tree(Kdtree *t1, Kdtree *t2) {
   int i;
 
   for(i = 0; i < t1->size; i++) {
@@ -93,8 +92,7 @@ void generate_data(int n) {
 
 void testKD_BUILD_STATIC(void) {
   Kdtree data, kd_tree1, kd_tree2;
-  int data_size, n;
-  char filename[1024];
+  int data_size;
 	
   CU_ASSERT((data_size = kd_read("tests/data/data1.txt", &data)) >= 0);
   CU_ASSERT(0 == kd_build(&data, &kd_tree1));
@@ -335,7 +333,6 @@ int main() {
     CU_cleanup_registry();
     return CU_get_error();
   }
-
 
   /* Run all tests using the CUnit Basic interface */
   CU_basic_set_mode(CU_BRM_VERBOSE);

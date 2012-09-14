@@ -26,11 +26,15 @@ typedef struct Kdtree {
 
 int kd_read(char *filename, Kdtree *p);
 
-//int kd_build(Kdtree *tree, Kdtree **kd_tree, int size, int *kd_tree_size, int c_index);
+int kd_build(Kdtree *tree, Kdtree *kd_tree);
+
+int kd_recursive(Kdtree *tree, Kdtree *kd_tree);
+
+int kd_build_recursive_iter(Node *tree, Kdtree *kd_tree, int size, int c_index);
 
 void kd_print(Kdtree *tree);
 
-//void kd_free(Kdtree *tree);
+void kd_free(Kdtree *tree);
 
 
 

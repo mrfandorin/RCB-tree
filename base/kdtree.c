@@ -49,7 +49,7 @@ int** generate_interval(int n) {
   current = median(left, right);
   ind[0] = left; ind[1] = right; ind[2] = left + current; ind[3] = -1; ind[4] = -1;
 
-  enqueue(&q, &ind);
+  enqueue(&q, ind);
 
   while(!empty(&q)) {
     res = (int*)dequeue(&q);
@@ -61,14 +61,14 @@ int** generate_interval(int n) {
       ind[2] = ind[0] + median(ind[0], ind[1]);
       ind[3] = i;
       ind[4] = left + current;
-      enqueue(&q, &ind);
+      enqueue(&q, ind);
     }
     if (left + current + 1 <= right) {
       ind[0] = left + current + 1; ind[1] = right;
       ind[2] = ind[0] + median(ind[0], ind[1]);
       ind[3] = i;
       ind[4] = left + current;
-      enqueue(&q, &ind);
+      enqueue(&q, ind);
     }
     i++;
   }
@@ -78,8 +78,7 @@ int** generate_interval(int n) {
 
 
 int kd_build(Kdtree *data, Kdtree *kd_tree) {
-  int size2, axis, i, j, level, c_level, t, left, right, current, c_index, p_index, parent, parent_value;
-  int **coords;
+  int size2, axis, i, level, c_level, left, right, current, c_index, parent, parent_value;
   int **ind;
 
   if (data->size == 0) {
@@ -144,20 +143,18 @@ int kd_build_recursive(Kdtree *data, Kdtree *kd_tree) {
   if (data->size == 0) {
     kd_tree->size = 0;
   }
-  kd_build_recursive_iter(data->nodes, kd_tree, data->size, 0);
+  return kd_build_recursive_iter(data->nodes, kd_tree, data->size, 0);
 }
 
 int kd_build_recursive_iter(Node *tree, Kdtree *kd_tree, int size, int c_index) {
   // Sorting points by coordinate
   int m_index, m_size; // median index
   int axis, size2;
-  Kdtree *tmp;
-  int i;
 
 
   //int c_index = 0; // current index
   if (size == 0) {
-    return;
+    return 0;
   }
 
   if (NULL == kd_tree->nodes) {
@@ -228,6 +225,8 @@ int kd_read(char *filename, Kdtree *data) {
 
   FILE *stream = fopen(filename, "r");
   if (stream == NULL) {
+    data->nodes = NULL;
+    data->size = 0;
     return -1;
   }    
 
@@ -267,26 +266,3 @@ int kd_read(char *filename, Kdtree *data) {
 
   return size;
 }
-/*
-int main(int argc, char **argv) {
-  Kdtree data, kd_tree;
-
-  printf("Iterative:\n");
-  kd_read("tests/data/data1.txt", &data);
-  kd_build(&data, &kd_tree);
-  kd_print(&kd_tree);
-  kd_free(&data);
-  kd_free(&kd_tree);
-
-  printf("Recursive:\n");
-  kd_read("tests/data/data1.txt", &data);
-  kd_tree.nodes = NULL;
-  kd_build_recursive(data.nodes, &kd_tree, data.size, 0);
-  kd_print(&kd_tree);
-  //kd_free(&data);
-  //kd_free(&kd_tree);
-
-  return 0;
-}
-
-*/
