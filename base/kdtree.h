@@ -10,6 +10,9 @@ typedef struct Node {
   float y;
   float z;
   bool fill;
+  bool closed;
+  int *neighbors;
+  int neighbors_size;
 	
   // data
   float v; // velocity
@@ -31,6 +34,12 @@ int kd_build(Kdtree *tree, Kdtree *kd_tree);
 int kd_recursive(Kdtree *tree, Kdtree *kd_tree);
 
 int kd_build_recursive_iter(Node *tree, Kdtree *kd_tree, int size, int c_index);
+
+int kd_nn_search(Kdtree *kd_tree, Node *point, int r, int **neighbors);
+
+void kd_nn_search_all(Kdtree *kd_tree, int r);
+
+float distance2(Node *p1, Node *p2);
 
 void kd_print(Kdtree *tree);
 

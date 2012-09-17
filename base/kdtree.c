@@ -4,6 +4,7 @@
 #include <math.h>
 #include "kdtree.h"
 #include "queue.h"
+#include "stack.h"
 
 
 /* qsort x coordinate comparison function */ 
@@ -28,6 +29,10 @@ int z_cmp(const void *a, const void *b)
   const Node *ia = (const Node *)a;
   const Node *ib = (const Node *)b;
   return ia->z - ib->z;
+}
+
+float distance2(Node *p1, Node *p2) {
+        return (p1->x - p2->x) * (p1->x - p2->x) + (p1->y - p2->y) * (p1->y - p2->y) + (p1->z - p2->z) * (p1->z - p2->z);
 }
 
 int median(int left, int right) {
@@ -76,6 +81,97 @@ int** generate_interval(int n) {
   return q.q;
 }
 
+void kd_nn_search_all(Kdtree *kd_tree, int r) {
+  int i, n;
+  int *neighbors;
+
+  for(i = 0; i < kd_tree->size; i++) {
+    n = kd_nn_search(kd_tree, &(kd_tree->nodes[i]), r, &neighbors);
+    kd_tree->nodes[i].neighbors = neighbors;
+    kd_tree->nodes[i].neighbors_size = n;
+  }
+
+}
+
+
+int kd_nn_search(Kdtree *kd_tree, Node *point, int r, int **neighbors) {
+        Stack s;
+        int current, axis, i, j;
+        int depth, level;
+	float dist2;
+
+        *neighbors = (int*)malloc((kd_tree->size - 1) * sizeof(int));
+
+        depth = ceil(log(kd_tree->size + 1)/log(2));
+
+        init_stack(&s, kd_tree->size);
+        push_stack(&s, 0);
+
+	for(i = 0; i < kd_tree->size; i++) {
+		kd_tree->nodes[i].closed = false;
+	}
+        i = 0; j = 0;
+        while(!empty_stack(&s)) {
+                current = pop_stack(&s);
+
+                level = (int)floor(log(2 * (current + 1))/log(2)) - 1;
+
+                if (kd_tree->nodes[current].fill == false) continue;
+                axis = level % 3;
+
+		dist2 = distance2(&(kd_tree->nodes[current]), point);
+                if (axis == 0) {                        
+                        if (kd_tree->nodes[current].closed == false && r * r >= dist2 && dist2 != 0) {
+                                (*neighbors)[i] = current; i++;
+                        }
+                        if (depth - 1 != level) {
+                                if (kd_tree->nodes[current].x >= point->x - r && kd_tree->nodes[current].x <= point->x + r) {
+                                        if (kd_tree->nodes[2 * current + 2].closed == false) push_stack(&s, 2 * current + 2);
+                                        if (kd_tree->nodes[2 * current + 1].closed == false) push_stack(&s, 2 * current + 1);
+                                } else if (kd_tree->nodes[current].x > point->x - r) {
+					if (kd_tree->nodes[2 * current + 1].closed == false) push_stack(&s, 2 * current + 1);
+				} else if (kd_tree->nodes[current].x < point->x + r) {
+                                        if (kd_tree->nodes[2 * current + 2].closed == false) push_stack(&s, 2 * current + 2);
+                                }
+                        }
+                } else if (axis == 1) {
+                        if (kd_tree->nodes[current].closed == false && r * r >= dist2 && dist2 != 0) {
+                                (*neighbors)[i] = current; i++;
+                        }
+                        if (depth - 1 != level) {
+                                if (kd_tree->nodes[current].y >= point->y - r && kd_tree->nodes[current].y <= point->y + r) {
+                                        if (kd_tree->nodes[2 * current + 2].closed == false) push_stack(&s, 2 * current + 2);
+                                        if (kd_tree->nodes[2 * current + 1].closed == false) push_stack(&s, 2 * current + 1);
+                                } else if (kd_tree->nodes[current].y > point->y - r) {
+                                        if (kd_tree->nodes[2 * current + 1].closed == false) push_stack(&s, 2 * current + 1);
+                                }
+                                if (kd_tree->nodes[current].y < point->y + r) {
+                                        if (kd_tree->nodes[2 * current + 2].closed == false) push_stack(&s, 2 * current + 2);
+                                }
+                        }
+
+		} else if (axis == 2) {
+                        if (kd_tree->nodes[current].closed == false && r * r >= dist2 && dist2 != 0) {
+                                (*neighbors)[i] = current; i++;
+                        }
+                        if (depth - 1 != level) {
+                                if (kd_tree->nodes[current].z >= point->z - r && kd_tree->nodes[current].z <= point->z + r) {
+                                        if (kd_tree->nodes[2 * current + 2].closed == false) push_stack(&s, 2 * current + 2);
+                                        if (kd_tree->nodes[2 * current + 1].closed == false) push_stack(&s, 2 * current + 1);
+                                } else if (kd_tree->nodes[current].z > point->z - r) {
+                                        if (kd_tree->nodes[2 * current + 1].closed == false) push_stack(&s, 2 * current + 1);
+                                } else if (kd_tree->nodes[current].z < point->z + r) {
+                                        if (kd_tree->nodes[2 * current + 2].closed == false) push_stack(&s, 2 * current + 2);
+                                }
+                        }
+
+                }
+		kd_tree->nodes[current].closed = true;
+		j++;
+        }
+        return i;
+
+}
 
 int kd_build(Kdtree *data, Kdtree *kd_tree) {
   int size2, axis, i, level, c_level, left, right, current, c_index, parent, parent_value;
@@ -205,11 +301,16 @@ int kd_build_recursive_iter(Node *tree, Kdtree *kd_tree, int size, int c_index) 
 
 
 void kd_print(Kdtree *tree) {
-  int i;
+  int i, j;
   printf("Print tree\n");
   for(i = 0; i < tree->size; i++) {
-    printf("%d (%.2f, %.2f, %.2f) (%.2f, %.2f)\n", i + 1, tree->nodes[i].x, tree->nodes[i].y, 
+    printf("%d (%.2f, %.2f, %.2f) (%.2f, %.2f) ", i, tree->nodes[i].x, tree->nodes[i].y, 
            tree->nodes[i].z, tree->nodes[i].v, tree->nodes[i].p);
+    printf("neighbors: ");
+    for(j = 0; j < tree->nodes[i].neighbors_size; j++) {
+	printf("%d ", tree->nodes[i].neighbors[j]);
+    } 
+    printf("\n");
   }
 }
 
@@ -245,6 +346,7 @@ int kd_read(char *filename, Kdtree *data) {
   // Allocation memory block for all points
   data->nodes = (Node*)calloc(size, sizeof(Node));
   data->size = size;
+
   if (data->nodes == NULL) {
     fclose(stream);
     return -3;
