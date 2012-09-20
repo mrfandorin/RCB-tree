@@ -5,12 +5,6 @@
 #define false 0
 typedef char bool;
 
-typedef struct CoordIndex {
-  float coord;
-  int index;
-} CoordIndex;
-
-
 typedef struct Node {
   float x;
   float y;

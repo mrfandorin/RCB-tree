@@ -133,55 +133,6 @@ float distance2(Node *p1, Node *p2) {
         return (p1->x - p2->x) * (p1->x - p2->x) + (p1->y - p2->y) * (p1->y - p2->y) + (p1->z - p2->z) * (p1->z - p2->z);
 }
 
-int median(int left, int right) {
-  if ((right - left + 1) % 2 == 0) {
-    return (right - left + 1) / 2 - 1;
-  } 
-  return (right - left + 1) / 2;
-}
-
-int** generate_interval(int n) {
-  int current, i = 0;
-  int left = 0, right = n - 1;
-  int ind[5];
-  int *res;  
-  Queue q;
-
-  init_queue(&q, n);
-
-	current = (left + right) / 2; 
-  ind[0] = left; ind[1] = right; 
-  ind[2] = current; 
-  ind[3] = -1; ind[4] = -1;
-
-  enqueue(&q, ind);
-
-  while(!empty(&q)) {
-    res = (int*)dequeue(&q);
-    left = res[0];
-    right = res[1];
-    current = (left + right) / 2;
-    if (left <= current - 1) {
-			ind[0] = left; ind[1] = current - 1;
-			ind[2] = (ind[0] + ind[1]) / 2;
-      ind[3] = i;
-      ind[4] = current;
-      enqueue(&q, ind);
-    }
-    if (current + 1 <= right) {
-		  ind[0] = current + 1;
-      ind[1] = right;
-			ind[2] = (ind[0] + ind[1]) / 2;
-      ind[3] = i;
-      ind[4] = current;
-      enqueue(&q, ind);
-    }
-    i++;
-  }
-
-  return q.q;
-}
-
 void kd_nn_search_all(Kdtree *kd_tree, int r) {
   int i, n;
   int *neighbors;
