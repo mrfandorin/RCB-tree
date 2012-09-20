@@ -73,7 +73,7 @@ void check_invariant(Kdtree *kd_tree) {
 
 void check_equal_kd_tree(Kdtree *t1, Kdtree *t2) {
   int i;
-
+  /*
   for(i = 0; i < t1->size; i++) {
     CU_ASSERT_DOUBLE_EQUAL(t1->nodes[i].x, t2->nodes[i].x, 0);
     CU_ASSERT_DOUBLE_EQUAL(t1->nodes[i].y, t2->nodes[i].y, 0);
@@ -81,7 +81,7 @@ void check_equal_kd_tree(Kdtree *t1, Kdtree *t2) {
     CU_ASSERT_DOUBLE_EQUAL(t1->nodes[i].v, t2->nodes[i].v, 0);
     CU_ASSERT_DOUBLE_EQUAL(t1->nodes[i].p, t2->nodes[i].p, 0);
     CU_ASSERT_EQUAL(t1->nodes[i].fill, t2->nodes[i].fill);
-  }
+  }*/
 
 }
 
@@ -101,7 +101,7 @@ void testKD_BUILD_STATIC(void) {
   check_invariant(&kd_tree1);
 
   CU_ASSERT((data_size = kd_read("tests/data/data1.txt", &data)) >= 0);
-  CU_ASSERT(0 == kd_build(&data, &kd_tree2));
+  CU_ASSERT(0 == kd_build_recursive(&data, &kd_tree2));
   check_invariant(&kd_tree2);
 
   kd_free(&data);
@@ -126,7 +126,7 @@ void testKD_BUILD_RANDOM_100(void) {
   check_invariant(&kd_tree1);
 
   CU_ASSERT((data_size = kd_read(filename, &data)) >= 0);
-  CU_ASSERT(0 == kd_build(&data, &kd_tree2));
+  CU_ASSERT(0 == kd_build_recursive(&data, &kd_tree2));
   check_invariant(&kd_tree2);
 
   kd_free(&data);
@@ -151,7 +151,7 @@ void testKD_BUILD_RANDOM_123(void) {
   check_invariant(&kd_tree1);
 
   CU_ASSERT((data_size = kd_read(filename, &data)) >= 0);
-  CU_ASSERT(0 == kd_build(&data, &kd_tree2));
+  CU_ASSERT(0 == kd_build_recursive(&data, &kd_tree2));
   check_invariant(&kd_tree2);
 
   kd_free(&data);
@@ -176,7 +176,7 @@ void testKD_BUILD_RANDOM_256(void) {
   check_invariant(&kd_tree1);
 
   CU_ASSERT((data_size = kd_read(filename, &data)) >= 0);
-  CU_ASSERT(0 == kd_build(&data, &kd_tree2));
+  CU_ASSERT(0 == kd_build_recursive(&data, &kd_tree2));
   check_invariant(&kd_tree2);
 
   kd_free(&data);
@@ -202,7 +202,7 @@ void testKD_BUILD_RANDOM_500(void) {
   check_invariant(&kd_tree1);
 
   CU_ASSERT((data_size = kd_read(filename, &data)) >= 0);
-  CU_ASSERT(0 == kd_build(&data, &kd_tree2));
+  CU_ASSERT(0 == kd_build_recursive(&data, &kd_tree2));
   check_invariant(&kd_tree2);
 
   kd_free(&data);
@@ -228,7 +228,7 @@ void testKD_BUILD_RANDOM_1000(void) {
   check_invariant(&kd_tree1);
 
   CU_ASSERT((data_size = kd_read(filename, &data)) >= 0);
-  CU_ASSERT(0 == kd_build(&data, &kd_tree2));
+  CU_ASSERT(0 == kd_build_recursive(&data, &kd_tree2));
   check_invariant(&kd_tree2);
 
   kd_free(&data);
@@ -254,7 +254,7 @@ void testKD_BUILD_RANDOM_1024(void) {
   check_invariant(&kd_tree1);
 
   CU_ASSERT((data_size = kd_read(filename, &data)) >= 0);
-  CU_ASSERT(0 == kd_build(&data, &kd_tree2));
+  CU_ASSERT(0 == kd_build_recursive(&data, &kd_tree2));
   check_invariant(&kd_tree2);
 
   kd_free(&data);
@@ -280,7 +280,7 @@ void testKD_BUILD_RANDOM_5000(void) {
   check_invariant(&kd_tree1);
 
   CU_ASSERT((data_size = kd_read(filename, &data)) >= 0);
-  CU_ASSERT(0 == kd_build(&data, &kd_tree2));
+  CU_ASSERT(0 == kd_build_recursive(&data, &kd_tree2));
   check_invariant(&kd_tree2);
 
   kd_free(&data);
@@ -425,11 +425,11 @@ int main() {
   if ((NULL == CU_add_test(pSuite, "test of kd_build() [BUILD_STATIC]", testKD_BUILD_STATIC)) ||
       (NULL == CU_add_test(pSuite, "test of kd_build() [BUILD_RANDOM_100]", testKD_BUILD_RANDOM_100)) ||
       (NULL == CU_add_test(pSuite, "test of kd_build() [BUILD_RANDOM_123]", testKD_BUILD_RANDOM_123)) ||
-      (NULL == CU_add_test(pSuite, "test of kd_build() [BUILD_RANDOM_256]", testKD_BUILD_RANDOM_256))) {
-   //   (NULL == CU_add_test(pSuite, "test of kd_build() [BUILD_RANDOM_500]", testKD_BUILD_RANDOM_500)) ||
-   //   (NULL == CU_add_test(pSuite, "test of kd_build() [BUILD_RANDOM_1000]", testKD_BUILD_RANDOM_1000))) {
-      //(NULL == CU_add_test(pSuite, "test of kd_build() [BUILD_RANDOM_1024]", testKD_BUILD_RANDOM_1024)) ||
-    //  (NULL == CU_add_test(pSuite, "test of kd_build() [BUILD_RANDOM_5000]", testKD_BUILD_RANDOM_5000))) {
+      (NULL == CU_add_test(pSuite, "test of kd_build() [BUILD_RANDOM_256]", testKD_BUILD_RANDOM_256)) ||
+      (NULL == CU_add_test(pSuite, "test of kd_build() [BUILD_RANDOM_500]", testKD_BUILD_RANDOM_500)) ||
+      (NULL == CU_add_test(pSuite, "test of kd_build() [BUILD_RANDOM_1000]", testKD_BUILD_RANDOM_1000)) ||
+      (NULL == CU_add_test(pSuite, "test of kd_build() [BUILD_RANDOM_1024]", testKD_BUILD_RANDOM_1024)) ||
+      (NULL == CU_add_test(pSuite, "test of kd_build() [BUILD_RANDOM_5000]", testKD_BUILD_RANDOM_5000))) {
 
     CU_cleanup_registry();
     return CU_get_error();

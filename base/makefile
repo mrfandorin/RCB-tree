@@ -6,7 +6,7 @@ test: clean kdtree.c kdtree.h queue.c queue.h stack.c stack.h tests/test.c
 	@./test
 
 example: clean kdtree.c kdtree.h queue.c queue.h
-	@gcc -o example examples/main.c kdtree.c kdtree.h queue.c queue.h stack.c stack.h -lm -I. -g -Wall
+	@gcc -o example examples/main.c kdtree.c kdtree.h queue.c queue.h stack.c stack.h -lm -I. -g -Wall -pg
 	@./example
 
 val: 

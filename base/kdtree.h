@@ -5,6 +5,12 @@
 #define false 0
 typedef char bool;
 
+typedef struct CoordIndex {
+  float coord;
+  int index;
+} CoordIndex;
+
+
 typedef struct Node {
   float x;
   float y;
@@ -31,7 +37,7 @@ int kd_read(char *filename, Kdtree *p);
 
 int kd_build(Kdtree *tree, Kdtree *kd_tree);
 
-int kd_recursive(Kdtree *tree, Kdtree *kd_tree);
+int kd_build_recursive(Kdtree *tree, Kdtree *kd_tree);
 
 int kd_build_recursive_iter(Node *tree, Kdtree *kd_tree, int size, int c_index);
 

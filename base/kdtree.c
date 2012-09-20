@@ -7,28 +7,132 @@
 #include "stack.h"
 
 
-/* qsort x coordinate comparison function */ 
-int x_cmp(const void *a, const void *b) 
-{ 
-  const Node *ia = (const Node *)a;  
+/* qsort x coordinate comparison function */
+int x_cmp(const void *a, const void *b)
+{
+  const Node *ia = (const Node *)a;
   const Node *ib = (const Node *)b;
   return ia->x - ib->x;
 }
 
-/* qsort y coordinate comparison function */ 
-int y_cmp(const void *a, const void *b) 
+/* qsort y coordinate comparison function */
+int y_cmp(const void *a, const void *b)
 {
   const Node *ia = (const Node *)a;
   const Node *ib = (const Node *)b;
   return ia->y - ib->y;
 }
 
-/* qsort z coordinate comparison function */ 
-int z_cmp(const void *a, const void *b) 
-{ 
+/* qsort z coordinate comparison function */
+int z_cmp(const void *a, const void *b)
+{
   const Node *ia = (const Node *)a;
   const Node *ib = (const Node *)b;
   return ia->z - ib->z;
+}
+
+
+void swap(Node *x, Node *y) {
+  Node temp = *x;
+  *x = *y;
+  *y = temp;
+}
+
+int quickselect(Node *arr, int left, int right, int axis) {
+  unsigned long i,ir,j,l,mid,k;
+  Node a,temp;
+
+  l=left;
+  ir=right;
+  k = (l + ir)/2;
+  for(;;) {
+    if (ir <= l+1) { 
+      if (axis == 0) {
+        if (ir == l+1 && arr[ir].x < arr[l].x) {
+	  swap(&arr[l],&arr[ir]);
+        }
+      } else if (axis == 1) {
+        if (ir == l+1 && arr[ir].y < arr[l].y) {
+          swap(&arr[l],&arr[ir]);
+        }
+      } else if (axis == 2) {
+        if (ir == l+1 && arr[ir].z < arr[l].z) {
+          swap(&arr[l],&arr[ir]);
+        }
+      } 
+
+      return k;//arr[k];
+    }
+    else {
+      mid=(l+ir) >> 1; 
+      swap(&arr[mid],&arr[l+1]);
+
+      if (axis == 0) {
+        if (arr[l].x > arr[ir].x) {
+	  swap(&arr[l],&arr[ir]);
+        }
+        if (arr[l+1].x > arr[ir].x) {
+	  swap(&arr[l+1],&arr[ir]);
+        }
+        if (arr[l].x > arr[l+1].x) {
+	  swap(&arr[l],&arr[l+1]);
+        }
+      } else if (axis == 1) {
+        if (arr[l].y > arr[ir].y) {
+          swap(&arr[l],&arr[ir]);
+        }
+        if (arr[l+1].y > arr[ir].y) {
+          swap(&arr[l+1],&arr[ir]);
+        }
+        if (arr[l].y > arr[l+1].y) {
+          swap(&arr[l],&arr[l+1]);
+        }
+      } else if (axis == 2) {
+        if (arr[l].z > arr[ir].z) {
+          swap(&arr[l],&arr[ir]);
+        }
+        if (arr[l+1].z > arr[ir].z) {
+          swap(&arr[l+1],&arr[ir]);
+        }
+        if (arr[l].z > arr[l+1].z) {
+          swap(&arr[l],&arr[l+1]);
+        }
+      }
+
+
+      i=l+1; 
+      j=ir;
+      a=arr[l+1]; 
+
+      if (axis == 0) {
+        for (;;) { 
+	  do i++; while (arr[i].x < a.x); 
+	  do j--; while (arr[j].x > a.x); 
+	  if (j < i) break; 
+	  swap(&arr[i],&arr[j]);
+        }
+      } else if (axis == 1) {
+        for (;;) {
+          do i++; while (arr[i].y < a.y);
+          do j--; while (arr[j].y > a.y);
+          if (j < i) break;
+          swap(&arr[i],&arr[j]);
+        }
+      } else if (axis == 2) {
+        for (;;) {
+          do i++; while (arr[i].z < a.z);
+          do j--; while (arr[j].z > a.z);
+          if (j < i) break;
+          swap(&arr[i],&arr[j]);
+        }
+      }
+
+      arr[l+1]=arr[j]; 
+      arr[j]=a;
+      if (j >= k) ir=j-1; 
+      if (j <= k) l=i;
+    }
+  }
 }
 
 float distance2(Node *p1, Node *p2) {
@@ -90,7 +194,6 @@ void kd_nn_search_all(Kdtree *kd_tree, int r) {
     kd_tree->nodes[i].neighbors = neighbors;
     kd_tree->nodes[i].neighbors_size = n;
   }
-
 }
 
 
@@ -120,11 +223,11 @@ int kd_nn_search(Kdtree *kd_tree, Node *point, int r, int **neighbors) {
                 axis = level % 3;
 
 		dist2 = distance2(&(kd_tree->nodes[current]), point);
-                if (axis == 0) {                        
-                        if (kd_tree->nodes[current].closed == false && r * r >= dist2 && dist2 != 0) {
-                                (*neighbors)[i] = current; i++;
-                        }
-                        if (depth - 1 != level) {
+		if (kd_tree->nodes[current].closed == false && r * r >= dist2 && dist2 != 0) {
+                	(*neighbors)[i] = current; i++;
+                }
+		if (depth - 1 != level) {
+                	if (axis == 0) {                        
                                 if (kd_tree->nodes[current].x >= point->x - r && kd_tree->nodes[current].x <= point->x + r) {
                                         if (kd_tree->nodes[2 * current + 2].closed == false) push_stack(&s, 2 * current + 2);
                                         if (kd_tree->nodes[2 * current + 1].closed == false) push_stack(&s, 2 * current + 1);
@@ -133,12 +236,7 @@ int kd_nn_search(Kdtree *kd_tree, Node *point, int r, int **neighbors) {
 				} else if (kd_tree->nodes[current].x < point->x + r) {
                                         if (kd_tree->nodes[2 * current + 2].closed == false) push_stack(&s, 2 * current + 2);
                                 }
-                        }
-                } else if (axis == 1) {
-                        if (kd_tree->nodes[current].closed == false && r * r >= dist2 && dist2 != 0) {
-                                (*neighbors)[i] = current; i++;
-                        }
-                        if (depth - 1 != level) {
+                	} else if (axis == 1) {
                                 if (kd_tree->nodes[current].y >= point->y - r && kd_tree->nodes[current].y <= point->y + r) {
                                         if (kd_tree->nodes[2 * current + 2].closed == false) push_stack(&s, 2 * current + 2);
                                         if (kd_tree->nodes[2 * current + 1].closed == false) push_stack(&s, 2 * current + 1);
@@ -148,13 +246,7 @@ int kd_nn_search(Kdtree *kd_tree, Node *point, int r, int **neighbors) {
                                 if (kd_tree->nodes[current].y < point->y + r) {
                                         if (kd_tree->nodes[2 * current + 2].closed == false) push_stack(&s, 2 * current + 2);
                                 }
-                        }
-
-		} else if (axis == 2) {
-                        if (kd_tree->nodes[current].closed == false && r * r >= dist2 && dist2 != 0) {
-                                (*neighbors)[i] = current; i++;
-                        }
-                        if (depth - 1 != level) {
+			} else if (axis == 2) {
                                 if (kd_tree->nodes[current].z >= point->z - r && kd_tree->nodes[current].z <= point->z + r) {
                                         if (kd_tree->nodes[2 * current + 2].closed == false) push_stack(&s, 2 * current + 2);
                                         if (kd_tree->nodes[2 * current + 1].closed == false) push_stack(&s, 2 * current + 1);
@@ -163,9 +255,8 @@ int kd_nn_search(Kdtree *kd_tree, Node *point, int r, int **neighbors) {
                                 } else if (kd_tree->nodes[current].z < point->z + r) {
                                         if (kd_tree->nodes[2 * current + 2].closed == false) push_stack(&s, 2 * current + 2);
                                 }
-                        }
-
-                }
+                	}
+		}
 		kd_tree->nodes[current].closed = true;
 		j++;
         }
@@ -174,7 +265,8 @@ int kd_nn_search(Kdtree *kd_tree, Node *point, int r, int **neighbors) {
 }
 
 int kd_build(Kdtree *data, Kdtree *kd_tree) {
-  int size2, axis, i, level, c_level, left, right, current, c_index, parent, parent_value;
+  int axis, i, level, c_level, j, median;
+  int left, right, current, c_index, parent, parent_value;
   int **ind;
 
   if (data->size == 0) {
@@ -184,85 +276,64 @@ int kd_build(Kdtree *data, Kdtree *kd_tree) {
   }
 
   level = ceil(log(data->size + 1)/log(2));
-  size2 = (int)pow(2, level) - 1;
+  kd_tree->size = (int)pow(2, level) - 1;
   
-  kd_tree->nodes = (Node*)calloc(size2, sizeof(Node));
-  kd_tree->size = size2;
+  kd_tree->nodes = (Node*)calloc(kd_tree->size, sizeof(Node));
 
-
-  if (NULL == kd_tree->nodes) {
-      return -1;
-  }
+  if (NULL == kd_tree->nodes) return -1;
 
   ind = generate_interval(data->size);
-
   for(i = 0; i < data->size; i++) {
     c_level = ((int)floor(log(2 * (i + 1))/log(2)) - 1);
    
     axis = c_level % 3;
-    if (i == 0) {
-      c_index = 0;
-    } else {
-      c_index = pow(2, level) - 1 + (i - (pow(2, level) - 2)) - 1;
-    }
-
-    //printf("(%d, %d, %d) parent %d data->size %d\n", ind[i][0], ind[i][1], ind[i][2], ind[i][3], data->size);
-    left = ind[i][0]; right = ind[i][1]; current = ind[i][2]; parent = ind[i][3]; parent_value = ind[i][4];
+    c_index = i;
+    
+    left = ind[i][0]; right = ind[i][1]; current = ind[i][2]; 
+    parent = ind[i][3]; parent_value = ind[i][4];
 
     if (c_level == level - 1 && ((data->size + 1) & data->size) != 0) {
+      c_index = 2 * parent + 2;
       if (current <= parent_value) {
         c_index = 2 * parent + 1;
-      } else {
-        c_index = 2 * parent + 2;
       }
-      //printf("c_index %d current %d parent_value %d\n", c_index, current, parent_value);
     } else {
-      if (axis == 0) {
-        qsort(&(data->nodes[left]), right - left + 1, sizeof(Node), x_cmp);
-      } else if (axis == 1) {
-        qsort(&(data->nodes[left]), right - left + 1, sizeof(Node), y_cmp);
-      } else if (axis == 2) {
-        qsort(&(data->nodes[left]), right - left + 1, sizeof(Node), z_cmp);
-      }
+      quickselect(data->nodes, left, right, axis);
     }
+
     memcpy(&(kd_tree->nodes[c_index]), &(data->nodes[current]), sizeof(Node));
     
     kd_tree->nodes[c_index].fill = true;
-    //kd_print(kd_tree);
   }
+  // Free array of indexes
+  for(i = 0; i < data->size; i++) {
+    free(ind[i]);
+  }
+  free(ind);
+
 
   return 0;
 }
 
 int kd_build_recursive(Kdtree *data, Kdtree *kd_tree) {
   kd_tree->nodes = NULL;
-  if (data->size == 0) {
-    kd_tree->size = 0;
-  }
+  if (data->size == 0) kd_tree->size = 0;
   return kd_build_recursive_iter(data->nodes, kd_tree, data->size, 0);
 }
 
 int kd_build_recursive_iter(Node *tree, Kdtree *kd_tree, int size, int c_index) {
-  // Sorting points by coordinate
   int m_index, m_size; // median index
-  int axis, size2;
+  int axis;
 
+  if (size == 0) return 0;
 
-  //int c_index = 0; // current index
-  if (size == 0) {
-    return 0;
-  }
-
-  if (NULL == kd_tree->nodes) {
+  if (kd_tree->nodes == NULL) {
     // Full number points in kd tree, by power 2
-    size2 = (int)pow(2, ceil(log(size + 1)/log(2))) - 1;
-    kd_tree->size = size2;
+    kd_tree->size = (int)pow(2, ceil(log(size + 1)/log(2))) - 1;
     // Allocation memory block for kd tree
-    kd_tree->nodes = (Node*)calloc(size2, sizeof(Node));
+    kd_tree->nodes = (Node*)calloc(kd_tree->size, sizeof(Node));
 
-    if (NULL == kd_tree->nodes) {
-      return 1;
-    }
+    if (kd_tree->nodes == NULL) return 1;
   }
   
   axis = ((int)floor(log(2 * (c_index + 1))/log(2)) - 1) % 3;
@@ -276,32 +347,25 @@ int kd_build_recursive_iter(Node *tree, Kdtree *kd_tree, int size, int c_index) 
   }
 
   m_index = size / 2;
-  if (size % 2 != 0) {
-    m_index += 1;
-  }
+  if (size % 2 != 0) m_index += 1;
   m_index--;
   m_size = m_index;
-  if (size % 2 == 0) {
-    m_size += 1;
-  }
+  if (size % 2 == 0) m_size += 1;
 
-        // Add a new point
+  // Add a new point
   memcpy(&(kd_tree->nodes[c_index]), &(tree[m_index]), sizeof(Node));
   kd_tree->nodes[c_index].fill = true;
 
-  //printf("Step: m_index=%d, m_size=%d, c_index=%d\n", m_index, m_size, c_index);
-  // Next axis
-  axis = (axis + 1) % 3;
   kd_build_recursive_iter(tree, kd_tree, m_index, 2 * (c_index + 1) - 1);
   kd_build_recursive_iter(tree + m_index + 1, kd_tree, m_size, 2 * (c_index + 1));
 
   return 0;
-
 }
 
 
 void kd_print(Kdtree *tree) {
   int i, j;
+
   printf("Print tree\n");
   for(i = 0; i < tree->size; i++) {
     printf("%d (%.2f, %.2f, %.2f) (%.2f, %.2f) ", i, tree->nodes[i].x, tree->nodes[i].y, 
