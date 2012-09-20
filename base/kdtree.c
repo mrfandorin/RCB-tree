@@ -6,6 +6,7 @@
 #include "queue.h"
 #include "stack.h"
 
+#define swap(x, y) {Node temp = *x; *x = *y; *y = temp;}
 
 /* qsort x coordinate comparison function */
 int x_cmp(const void *a, const void *b)
@@ -31,16 +32,9 @@ int z_cmp(const void *a, const void *b)
   return ia->z - ib->z;
 }
 
-
-void swap(Node *x, Node *y) {
-  Node temp = *x;
-  *x = *y;
-  *y = temp;
-}
-
 int quickselect(Node *arr, int left, int right, int axis) {
   unsigned long i,ir,j,l,mid,k;
-  Node a,temp;
+  Node a;
 
   l=left;
   ir=right;
@@ -155,8 +149,10 @@ int** generate_interval(int n) {
 
   init_queue(&q, n);
 
-  current = median(left, right);
-  ind[0] = left; ind[1] = right; ind[2] = left + current; ind[3] = -1; ind[4] = -1;
+	current = (left + right) / 2; 
+  ind[0] = left; ind[1] = right; 
+  ind[2] = current; 
+  ind[3] = -1; ind[4] = -1;
 
   enqueue(&q, ind);
 
@@ -164,19 +160,20 @@ int** generate_interval(int n) {
     res = (int*)dequeue(&q);
     left = res[0];
     right = res[1];
-    current = median(left, right);
-    if (left <= left + current - 1) {
-      ind[0] = left; ind[1] = left + current - 1; 
-      ind[2] = ind[0] + median(ind[0], ind[1]);
+    current = (left + right) / 2;
+    if (left <= current - 1) {
+			ind[0] = left; ind[1] = current - 1;
+			ind[2] = (ind[0] + ind[1]) / 2;
       ind[3] = i;
-      ind[4] = left + current;
+      ind[4] = current;
       enqueue(&q, ind);
     }
-    if (left + current + 1 <= right) {
-      ind[0] = left + current + 1; ind[1] = right;
-      ind[2] = ind[0] + median(ind[0], ind[1]);
+    if (current + 1 <= right) {
+		  ind[0] = current + 1;
+      ind[1] = right;
+			ind[2] = (ind[0] + ind[1]) / 2;
       ind[3] = i;
-      ind[4] = left + current;
+      ind[4] = current;
       enqueue(&q, ind);
     }
     i++;
@@ -265,9 +262,11 @@ int kd_nn_search(Kdtree *kd_tree, Node *point, int r, int **neighbors) {
 }
 
 int kd_build(Kdtree *data, Kdtree *kd_tree) {
-  int axis, i, level, c_level, j, median;
+  int axis, i, level, c_level;
   int left, right, current, c_index, parent, parent_value;
-  int **ind;
+	int ind[5];
+	int *res;  
+  Queue q;
 
   if (data->size == 0) {
     kd_tree->nodes = NULL;
@@ -282,15 +281,31 @@ int kd_build(Kdtree *data, Kdtree *kd_tree) {
 
   if (NULL == kd_tree->nodes) return -1;
 
-  ind = generate_interval(data->size);
-  for(i = 0; i < data->size; i++) {
-    c_level = ((int)floor(log(2 * (i + 1))/log(2)) - 1);
-   
+  init_queue(&q, data->size);
+	
+	left = 0; right = data->size - 1;
+	
+	current = (left + right) / 2; 
+  ind[0] = left; ind[1] = right; 
+  ind[2] = current; 
+  ind[3] = -1; ind[4] = -1;
+
+  enqueue(&q, ind);
+
+	i = 0;
+  while(!empty(&q)) {
+    res = (int*)dequeue(&q);
+    left = res[0];
+    right = res[1];
+    current = (left + right) / 2;
+
+		c_level = ((int)floor(log(2 * (i + 1))/log(2)) - 1);
+
     axis = c_level % 3;
     c_index = i;
-    
-    left = ind[i][0]; right = ind[i][1]; current = ind[i][2]; 
-    parent = ind[i][3]; parent_value = ind[i][4];
+
+    current = res[2]; 
+    parent = res[3]; parent_value = res[4];
 
     if (c_level == level - 1 && ((data->size + 1) & data->size) != 0) {
       c_index = 2 * parent + 2;
@@ -300,18 +315,33 @@ int kd_build(Kdtree *data, Kdtree *kd_tree) {
     } else {
       quickselect(data->nodes, left, right, axis);
     }
-
     memcpy(&(kd_tree->nodes[c_index]), &(data->nodes[current]), sizeof(Node));
-    
     kd_tree->nodes[c_index].fill = true;
-  }
-  // Free array of indexes
-  for(i = 0; i < data->size; i++) {
-    free(ind[i]);
-  }
-  free(ind);
 
+    if (left <= current - 1) {
+			ind[0] = left; ind[1] = current - 1;
+			ind[2] = (ind[0] + ind[1]) / 2;
+      ind[3] = i;
+      ind[4] = current;
+      enqueue(&q, ind);
+    }
+    if (current + 1 <= right) {
+		  ind[0] = current + 1;
+      ind[1] = right;
+			ind[2] = (ind[0] + ind[1]) / 2;
+      ind[3] = i;
+      ind[4] = current;
+      enqueue(&q, ind);
+    }
+    i++;
+  }
 
+   // Free array of indexes
+  /*for(i = 0; i < data->size; i++) {
+    free(q.q[i]);
+  }
+  free(q.q);
+  */
   return 0;
 }
 

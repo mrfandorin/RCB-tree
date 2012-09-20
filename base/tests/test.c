@@ -193,7 +193,7 @@ void testKD_BUILD_RANDOM_500(void) {
   int data_size, n;
   char filename[1024];
 
-  n = 500;
+  n = 500000;
   generate_data(n);
   sprintf(filename, "tests/data/data_size_%d.txt", n);
 
