@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include "queue.h"
 
-#define SIZE_Q 5
+#define SIZE_Q 3
 
 void init_queue(Queue *q, int n) {
   int i;
@@ -12,31 +12,29 @@ void init_queue(Queue *q, int n) {
   q->qsize = n;
   q->last = n - 1;
   q->count = 0;
-  q->q = (int**)malloc(n * sizeof(int*));
-  for(i = 0; i < n; i++) {
-    q->q[i] = (int*)malloc(SIZE_Q * sizeof(int));
-  } 
-  //q->q = (int*)malloc(SIZE_Q * n * sizeof(int)); 
 
+  q->q = (Interval*)malloc(n * sizeof(Interval));
 }
 
-void enqueue(Queue *q, int *x) {
+void enqueue(Queue *q, Interval *x) {
   if (q->count >= q->qsize) {
     printf("Queue overflow enqueue\n");
   } else {
     q->last = (q->last + 1) % q->qsize;
-    memcpy(q->q[q->last], x, SIZE_Q * sizeof(int));
+    q->q[q->last] = *x;
+//    memcpy(&(q->q[q->last]), x, sizeof(Interval));
     q->count = q->count + 1;
   }
 }
 
-int* dequeue(Queue *q) {
-  int *x;
 
+Interval* dequeue(Queue *q) {
+  Interval *x;
+  
   if (q->count <= 0) {
     printf("Empty queue dequeue.\n");
   } else {
-    x = q->q[q->first];
+    x = &(q->q[q->first]);
     q->first = (q->first + 1) % q->qsize;
     q->count = q->count - 1;
   }
@@ -51,7 +49,7 @@ int empty(Queue *q) {
   return 0;
 }
 
-void destroy_queue(Queue *q) {
+/*void destroy_queue(Queue *q) {
   int i;
   for(i = 0; i < q->qsize; i++) {
     free(q->q[i]);
@@ -66,10 +64,11 @@ void print_queue(Queue *q) {
   i = q->first; 
         
   while (i != q->last) {
-    printf("(%d, %d, %d, %d) ", q->q[i][0], q->q[i][1], q->q[i][2], q->q[i][3]);
-    i = (i + 1) % q->qsize;
+    //printf("(%d, %d, %d, %d) ", q->q[i][0], q->q[i][1], q->q[i][2], q->q[i][3]);
+    //i = (i + 1) % q->qsize;
   }
 
-  printf("(%d, %d, %d, %d) ", q->q[i][0], q->q[i][1], q->q[i][2], q->q[i][3]);
+  //printf("(%d, %d, %d, %d) ", q->q[i][0], q->q[i][1], q->q[i][2], q->q[i][3]);
   printf("\n");
 }
+*/

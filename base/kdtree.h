@@ -1,14 +1,14 @@
 #ifndef _KDTREE_H_
 #define _KDTREE_H_
 
+//#include "queue.h"
+
 #define true 1
 #define false 0
 typedef char bool;
 
 typedef struct Node {
-  float x;
-  float y;
-  float z;
+  float coords[3];
   bool fill;
   bool closed;
   int *neighbors;
@@ -31,9 +31,6 @@ int kd_read(char *filename, Kdtree *p);
 
 int kd_build(Kdtree *tree, Kdtree *kd_tree);
 
-int kd_build_recursive(Kdtree *tree, Kdtree *kd_tree);
-
-int kd_build_recursive_iter(Node *tree, Kdtree *kd_tree, int size, int c_index);
 
 int kd_nn_search(Kdtree *kd_tree, Node *point, int r, int **neighbors);
 

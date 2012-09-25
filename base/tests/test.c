@@ -46,43 +46,13 @@ void check_invariant(Kdtree *kd_tree) {
     right = kd_tree->nodes[2 * (i + 1)];
     level2 = ((int)floor(log(2 * (i + 1))/log(2)) - 1) % 3;
            
-    if (level2 == 0) {
       if (left.fill == true) {
-        CU_ASSERT_TRUE(left.x <= current.x);
+        CU_ASSERT_TRUE(left.coords[level2] <= current.coords[level2]);
       }
       if (right.fill == true) {
-        CU_ASSERT_TRUE(right.x >= current.x);
+        CU_ASSERT_TRUE(right.coords[level2] >= current.coords[level2]);
       }
-    } else if (level2 == 1) { 
-      if (left.fill == true) {
-        CU_ASSERT_TRUE(left.y <= current.y);
-      }
-      if (right.fill == true) {
-        CU_ASSERT_TRUE(right.y >= current.y);
-      }			
-    } else if (level2 == 2) {
-      if (left.fill == true) {
-        CU_ASSERT_TRUE(left.z <= current.z); 
-      }
-      if (right.fill == true) {
-        CU_ASSERT_TRUE(right.z >= current.z);
-      }                  
-    }
   }
-}
-
-void check_equal_kd_tree(Kdtree *t1, Kdtree *t2) {
-  int i;
-  /*
-  for(i = 0; i < t1->size; i++) {
-    CU_ASSERT_DOUBLE_EQUAL(t1->nodes[i].x, t2->nodes[i].x, 0);
-    CU_ASSERT_DOUBLE_EQUAL(t1->nodes[i].y, t2->nodes[i].y, 0);
-    CU_ASSERT_DOUBLE_EQUAL(t1->nodes[i].z, t2->nodes[i].z, 0);
-    CU_ASSERT_DOUBLE_EQUAL(t1->nodes[i].v, t2->nodes[i].v, 0);
-    CU_ASSERT_DOUBLE_EQUAL(t1->nodes[i].p, t2->nodes[i].p, 0);
-    CU_ASSERT_EQUAL(t1->nodes[i].fill, t2->nodes[i].fill);
-  }*/
-
 }
 
 void generate_data(int n) {
@@ -93,27 +63,21 @@ void generate_data(int n) {
 }
 
 void testKD_BUILD_STATIC(void) {
-  Kdtree data, kd_tree1, kd_tree2;
+  Kdtree data, kd_tree1;
   int data_size;
 	
   CU_ASSERT((data_size = kd_read("tests/data/data1.txt", &data)) >= 0);
   CU_ASSERT(0 == kd_build(&data, &kd_tree1));
   check_invariant(&kd_tree1);
 
-  CU_ASSERT((data_size = kd_read("tests/data/data1.txt", &data)) >= 0);
-  CU_ASSERT(0 == kd_build_recursive(&data, &kd_tree2));
-  check_invariant(&kd_tree2);
-
   kd_free(&data);
 
-  check_equal_kd_tree(&kd_tree1, &kd_tree2);
   kd_free(&kd_tree1);
-  kd_free(&kd_tree2);
   
 }
 
 void testKD_BUILD_RANDOM_100(void) {
-  Kdtree data, kd_tree1, kd_tree2;
+  Kdtree data, kd_tree1;
   int data_size, n;
   char filename[1024];
 
@@ -125,20 +89,13 @@ void testKD_BUILD_RANDOM_100(void) {
   CU_ASSERT(0 == kd_build(&data, &kd_tree1));
   check_invariant(&kd_tree1);
 
-  CU_ASSERT((data_size = kd_read(filename, &data)) >= 0);
-  CU_ASSERT(0 == kd_build_recursive(&data, &kd_tree2));
-  check_invariant(&kd_tree2);
-
   kd_free(&data);
 
-  check_equal_kd_tree(&kd_tree1, &kd_tree2);
-
   kd_free(&kd_tree1);
-  kd_free(&kd_tree2);
 }
 
 void testKD_BUILD_RANDOM_123(void) {
-  Kdtree data, kd_tree1, kd_tree2;
+  Kdtree data, kd_tree1;
   int data_size, n;
   char filename[1024];
 
@@ -150,20 +107,13 @@ void testKD_BUILD_RANDOM_123(void) {
   CU_ASSERT(0 == kd_build(&data, &kd_tree1));
   check_invariant(&kd_tree1);
 
-  CU_ASSERT((data_size = kd_read(filename, &data)) >= 0);
-  CU_ASSERT(0 == kd_build_recursive(&data, &kd_tree2));
-  check_invariant(&kd_tree2);
-
   kd_free(&data);
 
-  check_equal_kd_tree(&kd_tree1, &kd_tree2);
-
   kd_free(&kd_tree1);
-  kd_free(&kd_tree2);
 }
 
 void testKD_BUILD_RANDOM_256(void) {
-  Kdtree data, kd_tree1, kd_tree2;
+  Kdtree data, kd_tree1;
   int data_size, n;
   char filename[1024];
 
@@ -175,21 +125,14 @@ void testKD_BUILD_RANDOM_256(void) {
   CU_ASSERT(0 == kd_build(&data, &kd_tree1));
   check_invariant(&kd_tree1);
 
-  CU_ASSERT((data_size = kd_read(filename, &data)) >= 0);
-  CU_ASSERT(0 == kd_build_recursive(&data, &kd_tree2));
-  check_invariant(&kd_tree2);
-
   kd_free(&data);
 
-  check_equal_kd_tree(&kd_tree1, &kd_tree2);
-
   kd_free(&kd_tree1);
-  kd_free(&kd_tree2);
 }
 
 
 void testKD_BUILD_RANDOM_500(void) {
-  Kdtree data, kd_tree1, kd_tree2;
+  Kdtree data, kd_tree1;
   int data_size, n;
   char filename[1024];
 
@@ -201,21 +144,14 @@ void testKD_BUILD_RANDOM_500(void) {
   CU_ASSERT(0 == kd_build(&data, &kd_tree1));
   check_invariant(&kd_tree1);
 
-  CU_ASSERT((data_size = kd_read(filename, &data)) >= 0);
-  CU_ASSERT(0 == kd_build_recursive(&data, &kd_tree2));
-  check_invariant(&kd_tree2);
-
   kd_free(&data);
 
-  check_equal_kd_tree(&kd_tree1, &kd_tree2);
-
   kd_free(&kd_tree1);
-  kd_free(&kd_tree2);
 
 }
 
 void testKD_BUILD_RANDOM_1000(void) {
-  Kdtree data, kd_tree1, kd_tree2;
+  Kdtree data, kd_tree1;
   int data_size, n;
   char filename[1024];
 
@@ -227,21 +163,14 @@ void testKD_BUILD_RANDOM_1000(void) {
   CU_ASSERT(0 == kd_build(&data, &kd_tree1));
   check_invariant(&kd_tree1);
 
-  CU_ASSERT((data_size = kd_read(filename, &data)) >= 0);
-  CU_ASSERT(0 == kd_build_recursive(&data, &kd_tree2));
-  check_invariant(&kd_tree2);
-
   kd_free(&data);
 
-  check_equal_kd_tree(&kd_tree1, &kd_tree2);
-
   kd_free(&kd_tree1);
-  kd_free(&kd_tree2);
 
 }
 
 void testKD_BUILD_RANDOM_1024(void) {
-  Kdtree data, kd_tree1, kd_tree2;
+  Kdtree data, kd_tree1;
   int data_size, n;
   char filename[1024];
 
@@ -253,21 +182,14 @@ void testKD_BUILD_RANDOM_1024(void) {
   CU_ASSERT(0 == kd_build(&data, &kd_tree1));
   check_invariant(&kd_tree1);
 
-  CU_ASSERT((data_size = kd_read(filename, &data)) >= 0);
-  CU_ASSERT(0 == kd_build_recursive(&data, &kd_tree2));
-  check_invariant(&kd_tree2);
-
   kd_free(&data);
 
-  check_equal_kd_tree(&kd_tree1, &kd_tree2);
-
   kd_free(&kd_tree1);
-  kd_free(&kd_tree2);
 }
 
 
 void testKD_BUILD_RANDOM_5000(void) {
-  Kdtree data, kd_tree1, kd_tree2;
+  Kdtree data, kd_tree1;
   int data_size, n;
   char filename[1024];
 
@@ -279,16 +201,10 @@ void testKD_BUILD_RANDOM_5000(void) {
   CU_ASSERT(0 == kd_build(&data, &kd_tree1));
   check_invariant(&kd_tree1);
 
-  CU_ASSERT((data_size = kd_read(filename, &data)) >= 0);
-  CU_ASSERT(0 == kd_build_recursive(&data, &kd_tree2));
-  check_invariant(&kd_tree2);
-
   kd_free(&data);
 
-  check_equal_kd_tree(&kd_tree1, &kd_tree2);
 
   kd_free(&kd_tree1);
-  kd_free(&kd_tree2);
 
 }
 
@@ -329,9 +245,9 @@ void testCOMPARE_SIMPLE_SEARCH_STATIC(void) {
 
   srand(time(NULL));
 
-  point.x = 1;
-  point.y = 2;
-  point.z = 2;
+  point.coords[0] = 1;
+  point.coords[1] = 2;
+  point.coords[2] = 2;
   radius = rand() % 20;
  
   n1 = kd_nn_search(&kd_tree, &point, radius, &neighbors1);
@@ -368,9 +284,9 @@ void testCOMPARE_SIMPLE_SEARCH_RANDOM(void) {
   CU_ASSERT(0 == kd_build(&data, &kd_tree));
   kd_free(&data);
 
-  point.x = (float)(rand() % 1000);
-  point.y = (float)(rand() % 1000);
-  point.z = (float)(rand() % 1000);
+  point.coords[0] = (float)(rand() % 1000);
+  point.coords[1] = (float)(rand() % 1000);
+  point.coords[2] = (float)(rand() % 1000);
   radius = (float)(rand() % 1000);
 
   n1 = kd_nn_search(&kd_tree, &point, radius, &neighbors1);
