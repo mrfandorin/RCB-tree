@@ -3,6 +3,8 @@
 #include <string.h>
 #include <time.h>
 #include <CUnit/Basic.h>
+#include <time.h>
+#include <sys/timeb.h>
 #include "stack.h"
 #include "kdtree.h"
 
@@ -17,8 +19,9 @@ int clean_suite(void) {
 
 void testKD_READ_SUCCESS(void) {
   Kdtree data;
+  int ret;
 
-  CU_ASSERT(kd_read("tests/data/data.txt", &data) > 0);
+  CU_ASSERT((ret = kd_read("tests/data/data.txt", &data)) > 0);
   CU_ASSERT(NULL != data.nodes);
   kd_free(&data);
 }
@@ -220,6 +223,7 @@ int kd_nn_search_simple(Kdtree *kd_tree, Node *point, int r, int **neighbors) {
     dist2 = distance2(&(kd_tree->nodes[i]), point);
     if (r * r >= dist2 && dist2 != 0) {
 	(*neighbors)[j] = i;
+        //point->neighbors[j] = i;
 	j++;
     }
   }
@@ -238,6 +242,7 @@ void testCOMPARE_SIMPLE_SEARCH_STATIC(void) {
   int *neighbors1,* neighbors2;
   Node point;
   float radius;
+  Stack s;
 
   CU_ASSERT((data_size = kd_read("tests/data/data1.txt", &data)) >= 0);
   CU_ASSERT(0 == kd_build(&data, &kd_tree));
@@ -250,7 +255,8 @@ void testCOMPARE_SIMPLE_SEARCH_STATIC(void) {
   point.coords[2] = 2;
   radius = rand() % 20;
  
-  n1 = kd_nn_search(&kd_tree, &point, radius, &neighbors1);
+  init_stack(&s, kd_tree.size);
+  n1 = kd_nn_search(&kd_tree, &point, radius, &neighbors1, &s);
   qsort(neighbors1, n1, sizeof(int), sort_index); 
 
   n2 = kd_nn_search_simple(&kd_tree, &point, radius, &neighbors2);
@@ -262,21 +268,26 @@ void testCOMPARE_SIMPLE_SEARCH_STATIC(void) {
     CU_ASSERT(neighbors1[i] == neighbors2[i]); 
   }
 
+
   free(neighbors1);
   free(neighbors2);
   kd_free(&kd_tree);
 }
 
 void testCOMPARE_SIMPLE_SEARCH_RANDOM(void) {
-  int n1, n2, i, n;
+  int n1, n2, i, j, count, n;
   Kdtree data, kd_tree;
   int data_size;
   int *neighbors1,* neighbors2;
   Node point;
   float radius;
   char filename[1024];
+  struct timeb tmb1, tmb2;
+  Stack s;
 
-  n = 500;
+
+
+  n = 5000;
   generate_data(n);
   sprintf(filename, "tests/data/data_size_%d.txt", n);
 
@@ -287,21 +298,36 @@ void testCOMPARE_SIMPLE_SEARCH_RANDOM(void) {
   point.coords[0] = (float)(rand() % 1000);
   point.coords[1] = (float)(rand() % 1000);
   point.coords[2] = (float)(rand() % 1000);
+  //point.neighbors = (int*)malloc(N_SIZE * sizeof(int));
+
   radius = (float)(rand() % 1000);
 
-  n1 = kd_nn_search(&kd_tree, &point, radius, &neighbors1);
-  qsort(neighbors1, n1, sizeof(int), sort_index);
+  init_stack(&s, kd_tree.size);
+  n1 = kd_nn_search(&kd_tree, &point, radius, &neighbors1, &s);
+  point.neighbors = neighbors1;
+  //qsort(point.neighbors, n1, sizeof(int), sort_index);
 
   n2 = kd_nn_search_simple(&kd_tree, &point, radius, &neighbors2);
-  qsort(neighbors2, n2, sizeof(int), sort_index);
+  //qsort(neighbors2, n2, sizeof(int), sort_index);
   //printf("\nsize1=%d, size2=%d, radius=%lf, x=%lf, y=%lf, z=%lf\n", n1, n2, radius, point.x, point.y, point.z);
-  CU_ASSERT_FATAL(n1 == n2);
-  for(i = 0; i < n1; i++) {
-    CU_ASSERT(neighbors1[i] == neighbors2[i]);
-  }
+  CU_ASSERT_FATAL(n1 <= n2);
 
-  free(neighbors1);
-  free(neighbors2);
+  for(i = 0; i < n1; i++) {
+    count = 0;
+    for(j = 0; j < n2; j++) {
+      if (point.neighbors[i] == neighbors2[j]) { 
+        count++;
+      }
+    }
+    CU_ASSERT(count == 1);
+  }
+  ftime(&tmb1);
+  kd_nn_search_all(&kd_tree, radius);
+  ftime(&tmb2);
+  printf("nn_search 500: %ds\n", (tmb2.time * 1000 + tmb2.millitm) - (tmb1.time * 1000 + tmb1.millitm));
+
+  //free(neighbors1);
+  //free(neighbors2);
   kd_free(&kd_tree);
 }
 

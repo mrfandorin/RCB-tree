@@ -6,7 +6,6 @@
 #define SIZE_Q 3
 
 void init_queue(Queue *q, int n) {
-  int i;
 
   q->first = 0;
   q->qsize = n;

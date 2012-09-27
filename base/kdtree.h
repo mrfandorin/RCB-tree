@@ -1,10 +1,13 @@
 #ifndef _KDTREE_H_
 #define _KDTREE_H_
 
-//#include "queue.h"
+#include "stack.h"
 
 #define true 1
 #define false 0
+
+#define N_SIZE 100
+
 typedef char bool;
 
 typedef struct Node {
@@ -15,7 +18,7 @@ typedef struct Node {
   int neighbors_size;
 	
   // data
-  float v; // velocity
+  float velocity[3]; // velocity
   float p; // pressure
 		
 } Node;
@@ -32,9 +35,9 @@ int kd_read(char *filename, Kdtree *p);
 int kd_build(Kdtree *tree, Kdtree *kd_tree);
 
 
-int kd_nn_search(Kdtree *kd_tree, Node *point, int r, int **neighbors);
+int kd_nn_search(Kdtree *kd_tree, Node *point, float r, int **neighbors, Stack *s);
 
-void kd_nn_search_all(Kdtree *kd_tree, int r);
+void kd_nn_search_all(Kdtree *kd_tree, float r);
 
 float distance2(Node *p1, Node *p2);
 

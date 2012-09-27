@@ -13,6 +13,11 @@ void init_stack(Stack *s, int n) {
   
 }
 
+void clear_stack(Stack *s) {
+  s->last = -1;
+  s->count = 0;
+}
+
 void push_stack(Stack *s, int x) {
   if (s->count >= s->ssize) {
     printf("Stack overflow push\n");
